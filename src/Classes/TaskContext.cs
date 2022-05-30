@@ -56,7 +56,7 @@ public class TaskContext : DbContext
       task.Property(p => p.Title).IsRequired().HasMaxLength(150);
       task.Property(p => p.Description).IsRequired(false);
       task.Property(p => p.TaskPriority);
-      task.Property(p => p.CreatedAt);
+      task.Property(p => p.CreatedAt).HasDefaultValue(DateTime.Now);
       task.Ignore(p => p.Resume);
       task.HasData(taskInit);
     });

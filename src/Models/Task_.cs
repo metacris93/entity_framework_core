@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace entity_framework.src.Models;
 
@@ -20,6 +21,7 @@ public class Task_
   public DateTime CreatedAt { get; set; }
   public virtual Category Category { get; set; }
   // [NotMapped]
+  [JsonIgnore]
   public string Resume { get; set; }
 }
 public enum Priority

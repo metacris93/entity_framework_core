@@ -1,7 +1,9 @@
-using System.Text.Json.Serialization;
 using entity_framework.src.Classes;
+using entity_framework.src.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -9,7 +11,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<TaskContext>(p => p.UseNpgsql(connectionString));
 
 var app = builder.Build();
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 app.MapGet("/", () => "Hello World!");
 
 app.MapGet("/dbconnection", ([FromServices] TaskContext dbContext) => 
@@ -31,6 +33,16 @@ app.MapGet("/api/tasks/priority/{level}", ([FromServices] TaskContext dbContext,
       .Include(a => a.Category)
       .Where(a => (int)a.TaskPriority == level)
   );
+});
+
+app.MapPost("/api/tasks", async ([FromServices] TaskContext dbContext, [FromBody] Task_ task) =>
+{
+  task.Id = Guid.NewGuid();
+  // await dbContext.AddAsync(task); otra forma de agregar el registro
+  await dbContext.Tasks.AddAsync(task);
+  await dbContext.SaveChangesAsync();
+
+  return Results.Ok();
 });
 
 app.Run();
