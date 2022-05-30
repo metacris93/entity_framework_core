@@ -45,4 +45,33 @@ app.MapPost("/api/tasks", async ([FromServices] TaskContext dbContext, [FromBody
   return Results.Ok();
 });
 
+app.MapPut("/api/tasks/{id}", async ([FromServices] TaskContext dbContext, [FromBody] Task_ task, [FromRoute] Guid id) =>
+{
+  Guid taskId;
+  if (!Guid.TryParse(id.ToString(), out taskId)) return Results.BadRequest();
+
+  var currentTask = await dbContext.Tasks.FindAsync(taskId);
+  if (currentTask == null) return Results.NotFound();
+
+  currentTask.CategoryId = task.CategoryId;
+  currentTask.Title = task.Title;
+  currentTask.TaskPriority = task.TaskPriority;
+  currentTask.Description = task.Description;
+  await dbContext.SaveChangesAsync();
+  return Results.Ok();
+});
+
+app.MapDelete("/api/tasks/{id}", async ([FromServices] TaskContext dbContext, [FromRoute] Guid id) =>
+{
+  Guid taskId;
+  if (!Guid.TryParse(id.ToString(), out taskId)) return Results.BadRequest();
+
+  var task = await dbContext.Tasks.FindAsync(taskId);
+  if (task == null) return Results.NotFound();
+
+  dbContext.Remove<Task_>(task);
+  await dbContext.SaveChangesAsync();
+  return Results.Ok();
+});
+
 app.Run();
